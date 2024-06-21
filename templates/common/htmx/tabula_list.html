@@ -1,0 +1,84 @@
+
+{% load static %}
+
+<section class="ease-client-overview in-pd-y-20">
+
+    <div class="in-card ease-client">
+
+      <div class="in-card__header in-d-flex in-justify-between">
+        
+        <span class="in-card__title in-fw-bld" hx->{{ title }} overview</span>
+        <div class="in-header__form">
+                        
+          <form class="in-form">
+              <div class="in-form__group">
+              <input type="text" class="in-form__input" placeholder="Search...">
+              <i class="ri-search-line in-form__icon"></i>
+              </div>
+          </form>
+      </div>
+
+        <div class="in-actions in-d-flex ">
+            {% if user.company %}
+                <a href="" class="in-card__title in-fw-bld in-btn-primary in-btn in-btn-sq" hx-target="#{{ model_label }}-form" hx-target="#{{ model_label }}-content" hx-get="{% url 'common:add_item' app_label user.company.encrypted_id model_label %}" style="text-decoration: none;"> <i class="ri in-fs-20 ri-add-circle-fill"></i> </a>
+            {% elif user.profile %}    
+                <a href="" style="text-decoration: none;" class="in-card__title in-fw-bld in-btn-primary in-btn in-btn-sq" data-target-div="{{ model_label }}-form" hx-target="#{{ model_label }}-form" hx-get="{% url 'common:add_item' app_label user.profile.encrypted_id model_label %}"> <i class="ri in-fs-20 ri-add-circle-fill"></i> </a>
+            {% endif %}
+
+            <button onclick="closeContent(this)" class="in-card__title in-fw-bld in-btn-danger in-btn in-btn-sq in-mg-l-10"> <i class="ri in-fs-20 ri-close-circle-fill " data-target="{{ model_label }}-content"></i> </button>
+
+        </div>
+      </div>
+      {% if table_heads %}
+
+      {% include "common/htmx/table_partial.html" %}
+      {%else %}
+      
+      <h2 class="in-h2">No content yet </h2>
+
+      {% endif %}
+    </div>
+
+  </section><!-- .ease-client-overview ends -->
+<script>
+  
+function getItems(){
+    
+    htmx.ajax('GET', "{% url 'common:item_list' app_label user.company.encrypted_id model_label  %}",{target:'#{{ model_label }}-content'})
+    console.log('gotten')    
+}
+
+function updateItems(){
+    console.log('updateItems')
+    const _variables={
+    model_name:"{{ model_label }}",
+    app_name:"{{ app_label }}"
+
+    }
+    const modelDiv= document.getElementById("{{ model_label }}")
+
+    if (document.getElementById(`delete-form`)){
+      console.log('delete-form')
+      document.getElementById(`delete-form`).addEventListener('htmx:afterOnLoad',()=>{
+        
+        console.log('deleted')
+        getItems()
+
+    })
+    }
+
+    if (document.getElementById(`${_variables.model_name}-form`)){
+        const modelForm= document.getElementById(`${_variables.model_name}-form`)
+        console.log(modelDiv)
+    modelForm.addEventListener('htmx:afterOnLoad',()=>{
+        console.log('Item added')
+
+        getItems()
+        
+    })
+    }
+
+}
+updateItems();
+
+</script>
